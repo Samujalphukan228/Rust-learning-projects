@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="https://www.rust-lang.org/logos/rust-logo-512x512.png" width="90"/>
+  <img src="https://www.rust-lang.org/logos/rust-logo-512x512.png" width="90" alt="Rust Logo"/>
 </p>
 
 <h1 align="center">The Rust Journey</h1>
 
 <p align="center">
-  <sub>A new era of systems programming. Safe. Fast. Fearless.</sub>
+  <em>A new era of systems programming — Safe. Fast. Fearless.</em>
 </p>
 
 ---
@@ -13,60 +13,42 @@
 ## Why Rust
 
 <p align="center">
-  <sub>Performance of C. Safety of modern languages. Loved by developers worldwide.</sub>
+  <em>Performance of C. Safety of modern languages. Loved by developers worldwide.</em>
 </p>
 
-<!-- Desktop version (hidden on mobile) -->
 <table align="center" border="0" cellpadding="24">
 <tbody>
 <tr>
 <td align="center" width="25%">
-<b>Blazing Fast</b><br/>
+<strong>Blazing Fast</strong><br/>
 <sub>No runtime. No GC.<br/>Pure performance.</sub>
 </td>
 <td align="center" width="25%">
-<b>Memory Safe</b><br/>
+<strong>Memory Safe</strong><br/>
 <sub>Guaranteed safety<br/>at compile time.</sub>
 </td>
 <td align="center" width="25%">
-<b>Fearless Concurrency</b><br/>
+<strong>Fearless Concurrency</strong><br/>
 <sub>No data races.<br/>Ever.</sub>
 </td>
 <td align="center" width="25%">
-<b>Reliable</b><br/>
+<strong>Reliable</strong><br/>
 <sub>If it compiles,<br/>it works.</sub>
 </td>
 </tr>
 </tbody>
 </table>
 
-<!-- Mobile version (using details/summary for better mobile rendering) -->
-<div align="center">
-  
-**🚀 Blazing Fast**  
-_No runtime. No GC. Pure performance._
-
-**🛡️ Memory Safe**  
-_Guaranteed safety at compile time._
-
-**⚡ Fearless Concurrency**  
-_No data races. Ever._
-
-**✅ Reliable**  
-_If it compiles, it works._
-
-</div>
-
 ---
 
 ## The Progress
 
 <p align="center">
-  <sub>Every journey begins with a single <code>fn main()</code></sub>
+  <em>Every journey begins with a single <code>fn main()</code></em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Progress-25%25-F74C00?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Progress-25%25-F74C00?style=for-the-badge" alt="Progress Badge"/>
 </p>
 
 <div align="center">
@@ -85,10 +67,10 @@ _If it compiles, it works._
 ## The Code
 
 <p align="center">
-  <sub>Writing software that stands the test of time.</sub>
+  <em>Writing software that stands the test of time.</em>
 </p>
 
-
+```rust
 // A minimal, compilable example representing the journey.
 
 struct Developer;
@@ -103,3 +85,4 @@ fn main() {
     let developer = Developer;
     developer.learn_rust();
 }
+<p align="center"> <sub>Built with 🦀 and determination.</sub> </p> 
