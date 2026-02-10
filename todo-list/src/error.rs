@@ -12,7 +12,7 @@ pub enum AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        tracing::error!("{:?",self);
+        tracing::error!("{:?}", self);
 
         match self {
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg).into_response(),
