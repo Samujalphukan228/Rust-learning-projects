@@ -8,4 +8,4 @@ pub struct Claims {
     pub exp: usize,
 }
 
-pub
+pub fn generate_token(user_id: &str, secret: &str) -> Result<String,
