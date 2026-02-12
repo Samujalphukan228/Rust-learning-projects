@@ -51,4 +51,15 @@ pub async fn login(
         .find_one(doc! {"email": &email}, None)
         .await?
         .ok_or(AppError::InvalidCredentials);
+
+    if !verify_password(&user.password_hash, &password) {
+        return Err(AppError::InvalidCredentials);
+    }
+
+    let id = user.id.unwrap().to_hex();
+
+    let token = generate_token(&id, jwt_secret)
+        .map_err(|_| AppError::TokenGenerationError)?;
+
+    Ok(token)
 }
