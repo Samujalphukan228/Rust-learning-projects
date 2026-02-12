@@ -19,4 +19,21 @@ pub async fn register(
         return Err(AppError::UserExists);
     }
 
+    let hashed_password = hash_password(&password)
+    .map_err(|_| AppError::HashingError)?;
+
+    let user = User {
+        id: None,
+        email,
+        password_hash,
+        created_at: Utc::now(),
+    };
+
+    let result = users.insert_one(user, None).await?;
+    let id = result.inserted_id.as_object_id().unwrap().to_hex();
+
+    let token = generate_token(&id, &jwt_secret)
+        .map_err(|_| AppError::TokenGenerationError)?;
+
+    Ok(token)
 }
