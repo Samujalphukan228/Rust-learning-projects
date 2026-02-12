@@ -37,3 +37,18 @@ pub async fn register(
 
     Ok(token)
 }
+
+
+pub async fn login(
+    db: &Database,
+    email: String,
+    password: String,
+    jwt_secret: &str,
+) -> Result<String, AppError> {
+    let users = db.collection::<User>("users");
+    
+    let user = users
+        .find_one(doc! {"email": &email}, None)
+        .await?
+        .ok_or(AppError::InvalidCredentials);
+}
