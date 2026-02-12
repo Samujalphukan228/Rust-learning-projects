@@ -1,5 +1,17 @@
 use mongodb::{Database, bson::doc};
 use chrono::Utc;
 use crate::{
-    models::
+    models::user::User,
+    utils::password::{hash_password, verify_password},
+    services::token_service::generate_token,
+    errors::AppError,
+};
+
+pub async fn register(
+    db: Database,
+    email: String,
+    password: String,
+    jwt_secret: String,
+) -> Result<String, AppError> {
+    
 }
