@@ -18,4 +18,13 @@ pub enum AppError {
 
     #[error("Database error")]
     DatabaseError,
+
+    #[error("Internal error")]
+    InternalError,
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        
+    }
 }
