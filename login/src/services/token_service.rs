@@ -8,4 +8,16 @@ pub struct Claims {
     pub exp: usize,
 }
 
-pub fn generate_token(user_id: &str, secret: &str) -> Result<String,
+pub fn generate_token(user_id: &str, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
+    let expiration = Utc::now()
+        .checked_add_signed(Duration::hours(1))
+        .unwrap()
+        .timestamp() as usize;
+
+    let claims = Claims {
+        sub: user_id.to_string(),
+        exp: expiration,
+    };
+
+    encode(&Header::default(), &claims, &EncodingKey::from_secret(secret.as_ref()))
+}
