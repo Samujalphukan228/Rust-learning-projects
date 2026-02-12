@@ -13,5 +13,10 @@ pub async fn register(
     password: String,
     jwt_secret: String,
 ) -> Result<String, AppError> {
-    
+
+    let users = db.collection::<User>("users");
+    if users.find_one(doc! {"email": &email}, None).await?.is_some() {
+        return Err(AppError::UserExists);
+    }
+
 }
