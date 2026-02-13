@@ -17,6 +17,7 @@ pub async fn register(
     State(state): State<AppState>,
     Json(payload): Json<AuthPayload>,
 ) -> Result<Json<String>, AppError> {
+
     let token = auth_service::register(
         &state.db,
         payload.email,

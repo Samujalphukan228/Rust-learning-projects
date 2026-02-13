@@ -20,6 +20,12 @@ pub enum AppError {
 
     #[error("Internal error")]
     InternalError,
+
+    #[error("Hashing error")]
+    HashingError,
+
+    #[error("Token generation error")]
+    TokenGenerationError,
 }
 
 impl IntoResponse for AppError {
@@ -30,6 +36,8 @@ impl IntoResponse for AppError {
             AppError::Unauthorized => StatusCode::UNAUTHORIZED,
             AppError::DatabaseError => StatusCode::INTERNAL_SERVER_ERROR,
             AppError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
+            AppError::HashingError => StatusCode::INTERNAL_SERVER_ERROR,
+            AppError::TokenGenerationError => StatusCode::INTERNAL_SERVER_ERROR,
         };
 
         (status, self.to_string()).into_response()

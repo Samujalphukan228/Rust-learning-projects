@@ -7,6 +7,6 @@ pub struct User {
     pub id: Option<ObjectId>,
     pub email: String,
     pub password_hash: String,
-    pub created_at: chorono::DateTime<chrono::Utc>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 
 } 
