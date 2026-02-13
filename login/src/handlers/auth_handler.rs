@@ -14,5 +14,30 @@ pub struct AuthPayload {
 }
 
 pub async fn register(
-    State
-)
+    State(state): State<AppState>,
+    Json(payload): Json<AuthPayload>,
+) -> Result<Json<String>, AppError> {
+    let token = auth_service::register(
+        &state.db,
+        payload.email,
+        payload.password,
+        &state.jwt_secret,
+    ).await?;
+
+    Ok(Json(token))
+}
+
+pub async fn login(
+    State(state): State<AppState>,
+    Json(payload): Json<AuthPayload>,
+) -> Result<Json<String>, AppError> {
+
+    let token = auth_service::login(
+        &state.db,
+        payload.email,
+        payload.password,
+        &state.jwt_secret,
+    ).await?;
+
+    Ok(Json(token))
+}
