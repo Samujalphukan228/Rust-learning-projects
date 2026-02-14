@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📝 Notes Search API - Full Elasticsearch Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 0;
+      border-bottom: 2px solid #0f3460;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #00d9ff, #00ff88);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: #8892b0;
+      font-size: 1.1rem;
+    }
+
+    .health-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+      padding: 8px 16px;
+      background: rgba(0, 255, 136, 0.1);
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .health-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #00ff88;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 30px;
+    }
+
+    .sidebar {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    .sidebar h2 {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: #00d9ff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-group {
+      margin-bottom: 25px;
+    }
+
+    .action-group h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #8892b0;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00d9ff, #00a8cc);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #00ff88, #00cc6a);
+      color: #1a1a2e;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff4757, #ff3344);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-container {
+      position: relative;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 15px 20px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #00d9ff;
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+    }
+
+    .search-input::placeholder {
+      color: #8892b0;
+    }
+
+    .search-btn {
+      padding: 15px 30px;
+      background: linear-gradient(135deg, #00d9ff, #00a8cc);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    .search-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .search-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .search-type-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+    }
+
+    .search-type-btn:hover,
+    .search-type-btn.active {
+      background: #00d9ff;
+      border-color: #00d9ff;
+      color: #1a1a2e;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: #8892b0;
+      margin-bottom: 5px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .filter-group select option {
+      background: #1a1a2e;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1a1a2e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      margin-top: 5px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+
+    .suggestions.show {
+      display: block;
+    }
+
+    .suggestion-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .suggestion-item:hover {
+      background: rgba(0, 217, 255, 0.1);
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .results-count {
+      color: #8892b0;
+    }
+
+    .results-count span {
+      color: #00ff88;
+      font-weight: 600;
+    }
+
+    .results-grid {
+      display: grid;
+      gap: 15px;
+    }
+
+    .result-card {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      border-left: 4px solid #00d9ff;
+      transition: all 0.3s ease;
+    }
+
+    .result-card:hover {
+      transform: translateX(5px);
+      background: rgba(0, 217, 255, 0.05);
+    }
+
+    .result-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .result-card p {
+      color: #8892b0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .result-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .result-score {
+      background: linear-gradient(135deg, #00ff88, #00cc6a);
+      color: #1a1a2e;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .result-category {
+      background: rgba(0, 217, 255, 0.2);
+      color: #00d9ff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+
+    .result-tag {
+      background: rgba(255, 255, 255, 0.1);
+      color: #8892b0;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 0.75rem;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .result-actions button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-similar {
+      background: rgba(0, 217, 255, 0.2);
+      color: #00d9ff;
+    }
+
+    .btn-delete {
+      background: rgba(255, 71, 87, 0.2);
+      color: #ff4757;
+    }
+
+    .btn-similar:hover,
+    .btn-delete:hover {
+      transform: scale(1.05);
+    }
+
+    mark {
+      background: rgba(0, 255, 136, 0.3);
+      color: #00ff88;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-card h4 {
+      color: #8892b0;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #00d9ff, #00ff88);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .tag-item {
+      background: rgba(0, 217, 255, 0.1);
+      color: #00d9ff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tag-item:hover {
+      background: #00d9ff;
+      color: #1a1a2e;
+    }
+
+    .tag-count {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 5px;
+      font-size: 0.8rem;
+    }
+
+    .category-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .category-name {
+      width: 120px;
+      font-size: 0.9rem;
+      color: #8892b0;
+    }
+
+    .category-progress {
+      flex: 1;
+      height: 24px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 15px;
+    }
+
+    .category-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00d9ff, #00ff88);
+      border-radius: 12px;
+      transition: width 0.5s ease;
+    }
+
+    .category-count {
+      width: 40px;
+      text-align: right;
+      font-weight: 600;
+      color: #00ff88;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #1a1a2e;
+      border-radius: 16px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+      font-size: 1.3rem;
+      color: #00d9ff;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #8892b0;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #8892b0;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 15px 25px;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 500;
+      z-index: 2000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-success {
+      background: linear-gradient(135deg, #00ff88, #00cc6a);
+      color: #1a1a2e;
+    }
+
+    .toast-error {
+      background: linear-gradient(135deg, #ff4757, #ff3344);
+    }
+
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .loader.show {
+      display: block;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #00d9ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #8892b0;
+    }
+
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📝 Notes Search API</h1>
+      <p>Full Elasticsearch Power - Fuzzy Search, Filters, Analytics & More</p>
+      <div class="health-status" id="healthStatus">
+        <div class="health-dot"></div>
+        <span>Checking connection...</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <h2>⚡ Quick Actions</h2>
+
+        <div class="action-group">
+          <h3>📦 Data Management</h3>
+          <button class="btn btn-success" onclick="seedData()">🌱 Seed Sample Data</button>
+          <button class="btn btn-primary" onclick="openCreateModal()">➕ Create Note</button>
+          <button class="btn btn-secondary" onclick="getAllNotes()">📋 Get All Notes</button>
+          <button class="btn btn-danger" onclick="deleteAllNotes()">🗑️ Delete All Notes</button>
+        </div>
+
+        <div class="action-group">
+          <h3>📊 Analytics</h3>
+          <button class="btn btn-secondary" onclick="getCategories()">📁 Category Stats</button>
+          <button class="btn btn-secondary" onclick="getTags()">🏷️ Tag Cloud</button>
+          <button class="btn btn-secondary" onclick="getTimeline()">📈 Timeline</button>
+        </div>
+
+        <div class="action-group">
+          <h3>🔧 Utilities</h3>
+          <button class="btn btn-secondary" onclick="reindex()">🔄 Reindex Data</button>
+          <button class="btn btn-secondary" onclick="checkHealth()">💚 Health Check</button>
+        </div>
+
+        <div class="action-group">
+          <h3>🧪 Test Fuzzy Search</h3>
+          <p style="font-size: 0.85rem; color: #8892b0; margin-bottom: 10px;">
+            Try typing with errors!
+          </p>
+          <button class="btn btn-secondary" onclick="searchQuery('Pythonnn')">Pythonnn →</button>
+          <button class="btn btn-secondary" onclick="searchQuery('Javascrpt')">Javascrpt →</button>
+          <button class="btn btn-secondary" onclick="searchQuery('Docekr')">Docekr →</button>
+          <button class="btn btn-secondary" onclick="searchQuery('Kuberntes')">Kuberntes →</button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Search Card -->
+        <div class="card">
+          <h2>🔍 Search Notes</h2>
+          
+          <div class="search-container">
+            <div class="search-box">
+              <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Search notes... (try typing with errors!)"
+                oninput="handleSearchInput()"
+                onkeypress="if(event.key === 'Enter') performSearch()"
+              >
+              <button class="search-btn" onclick="performSearch()">Search</button>
+            </div>
+
+            <div class="suggestions" id="suggestions"></div>
+
+            <div class="search-options">
+              <button class="search-type-btn active" onclick="setSearchType('basic', this)">
+                🔤 Basic (Fuzzy)
+              </button>
+              <button class="search-type-btn" onclick="setSearchType('phrase', this)">
+                📝 Phrase
+              </button>
+              <button class="search-type-btn" onclick="setSearchType('wildcard', this)">
+                ✳️ Wildcard
+              </button>
+              <button class="search-type-btn" onclick="setSearchType('advanced', this)">
+                ⚙️ Advanced
+              </button>
+            </div>
+
+            <div class="filters" id="advancedFilters" style="display: none;">
+              <div class="filter-group">
+                <label>Category</label>
+                <select id="filterCategory">
+                  <option value="">All Categories</option>
+                  <option value="programming">Programming</option>
+                  <option value="database">Database</option>
+                  <option value="devops">DevOps</option>
+                  <option value="cloud">Cloud</option>
+                  <option value="ai">AI/ML</option>
+                  <option value="tools">Tools</option>
+                  <option value="architecture">Architecture</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Tags (comma-separated)</label>
+                <input type="text" id="filterTags" placeholder="e.g. docker,kubernetes">
+              </div>
+              <div class="filter-group">
+                <label>Sort By</label>
+                <select id="filterSort">
+                  <option value="relevance">Relevance</option>
+                  <option value="date">Date</option>
+                  <option value="title">Title</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Order</label>
+                <select id="filterOrder">
+                  <option value="desc">Descending</option>
+                  <option value="asc">Ascending</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Card -->
+        <div class="card">
+          <div class="results-header">
+            <h2>📄 Results</h2>
+            <div class="results-count">
+              Found <span id="resultsCount">0</span> notes
+            </div>
+          </div>
+
+          <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Searching...</p>
+          </div>
+
+          <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <h3>No results yet</h3>
+            <p>Try searching for something or seed sample data</p>
+          </div>
+
+          <div class="results-grid" id="resultsGrid"></div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="card" id="statsCard" style="display: none;">
+          <h2>📊 Analytics</h2>
+          <div id="statsContent"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Create Note Modal -->
+  <div class="modal" id="createModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>➕ Create New Note</h3>
+        <button class="modal-close" onclick="closeCreateModal()">&times;</button>
+      </div>
+      <form onsubmit="createNote(event)">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="noteTitle" required placeholder="Enter note title">
+        </div>
+        <div class="form-group">
+          <label>Content</label>
+          <textarea id="noteContent" required placeholder="Enter note content"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="noteCategory">
+            <option value="general">General</option>
+            <option value="programming">Programming</option>
+            <option value="database">Database</option>
+            <option value="devops">DevOps</option>
+            <option value="cloud">Cloud</option>
+            <option value="ai">AI/ML</option>
+            <option value="tools">Tools</option>
+            <option value="architecture">Architecture</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tags (comma-separated)</label>
+          <input type="text" id="noteTags" placeholder="e.g. javascript, web, frontend">
+        </div>
+        <button type="submit" class="btn btn-success" style="width: 100%;">Create Note</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_URL = 'http://localhost:3000';
+    let searchType = 'basic';
+    let suggestTimeout;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      checkHealth();
+    });
+
+    // Health Check
+    async function checkHealth() {
+      try {
+        const response = await fetch(`${API_URL}/health`);
+        const data = await response.json();
+        
+        const statusEl = document.getElementById('healthStatus');
+        if (data.status === 'ok') {
+          statusEl.innerHTML = `
+            <div class="health-dot"></div>
+            <span>MongoDB: ${data.mongodb} | ES: ${data.elasticsearch.status}</span>
+          `;
+        }
+      } catch (error) {
+        document.getElementById('healthStatus').innerHTML = `
+          <div class="health-dot" style="background: #ff4757;"></div>
+          <span>Connection failed - Is server running?</span>
+        `;
+      }
+    }
+
+    // Show Toast
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast toast-${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Seed Data
+    async function seedData() {
+      try {
+        showLoader();
+        const response = await fetch(`${API_URL}/notes/seed`, { method: 'POST' });
+        const data = await response.json();
+        showToast(`✅ Seeded ${data.created} notes!`);
+        getAllNotes();
+      } catch (error) {
+        showToast('❌ Failed to seed data', 'error');
+      }
+    }
+
+    // Get All Notes
+    async function getAllNotes() {
+      try {
+        showLoader();
+        const response = await fetch(`${API_URL}/notes`);
+        const data = await response.json();
+        displayResults(data.notes || data, 'all');
+      } catch (error) {
+        showToast('❌ Failed to fetch notes', 'error');
+      }
+    }
+
+    // Delete All Notes
+    async function deleteAllNotes() {
+      if (!confirm('Are you sure you want to delete ALL notes?')) return;
+      
+      try {
+        const response = await fetch(`${API_URL}/notes`, { method: 'DELETE' });
+        const data = await response.json();
+        showToast(`🗑️ Deleted ${data.deletedCount} notes`);
+        displayResults([], 'all');
+      } catch (error) {
+        showToast('❌ Failed to delete notes', 'error');
+      }
+    }
+
+    // Search
+    async function performSearch() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) {
+        showToast('Please enter a search query', 'error');
+        return;
+      }
+
+      try {
+        showLoader();
+        let url;
+        
+        switch (searchType) {
+          case 'phrase':
+            url = `${API_URL}/search/phrase?q=${encodeURIComponent(query)}`;
+            break;
+          case 'wildcard':
+            url = `${API_URL}/search/wildcard?q=${encodeURIComponent(query)}`;
+            break;
+          case 'advanced':
+            const category = document.getElementById('filterCategory').value;
+            const tags = document.getElementById('filterTags').value;
+            const sort = document.getElementById('filterSort').value;
+            const order = document.getElementById('filterOrder').value;
+            
+            let params = `q=${encodeURIComponent(query)}`;
+            if (category) params += `&category=${category}`;
+            if (tags) params += `&tags=${tags}`;
+            params += `&sort=${sort}&order=${order}`;
+            
+            url = `${API_URL}/search/advanced?${params}`;
+            break;
+          default:
+            url = `${API_URL}/search?q=${encodeURIComponent(query)}`;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+        displayResults(data.results, 'search');
+        showToast(`Found ${data.total} results for "${query}"`);
+      } catch (error) {
+        showToast('❌ Search failed', 'error');
+        hideLoader();
+      }
+    }
+
+    // Quick search from sidebar
+    function searchQuery(query) {
+      document.getElementById('searchInput').value = query;
+      performSearch();
+    }
+
+    // Search Type
+    function setSearchType(type, btn) {
+      searchType = type;
+      document.querySelectorAll('.search-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      const filters = document.getElementById('advancedFilters');
+      filters.style.display = type === 'advanced' ? 'grid' : 'none';
+    }
+
+    // Autocomplete
+    async function handleSearchInput() {
+      const query = document.getElementById('searchInput').value.trim();
+      
+      clearTimeout(suggestTimeout);
+      
+      if (query.length < 2) {
+        document.getElementById('suggestions').classList.remove('show');
+        return;
+      }
+
+      suggestTimeout = setTimeout(async () => {
+        try {
+          const response = await fetch(`${API_URL}/search/suggest?q=${encodeURIComponent(query)}`);
+          const data = await response.json();
+          
+          const suggestionsEl = document.getElementById('suggestions');
+          
+          if (data.suggestions && data.suggestions.length > 0) {
+            suggestionsEl.innerHTML = data.suggestions.map(s => `
+              <div class="suggestion-item" onclick="selectSuggestion('${s.title}')">
+                ${s.title}
+              </div>
+            `).join('');
+            suggestionsEl.classList.add('show');
+          } else {
+            suggestionsEl.classList.remove('show');
+          }
+        } catch (error) {
+          console.error('Suggestion error:', error);
+        }
+      }, 300);
+    }
+
+    function selectSuggestion(title) {
+      document.getElementById('searchInput').value = title;
+      document.getElementById('suggestions').classList.remove('show');
+      performSearch();
+    }
+
+    // Display Results
+    function displayResults(results, type) {
+      hideLoader();
+      
+      const grid = document.getElementById('resultsGrid');
+      const emptyState = document.getElementById('emptyState');
+      const countEl = document.getElementById('resultsCount');
+
+      countEl.textContent = results.length;
+
+      if (results.length === 0) {
+        grid.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      grid.innerHTML = results.map(note => `
+        <div class="result-card">
+          <h3>${highlightText(note.title, note.highlights?.title)}</h3>
+          <p>${highlightText(truncate(note.content, 200), note.highlights?.content)}</p>
+          <div class="result-meta">
+            ${note.score ? `<span class="result-score">Score: ${note.score.toFixed(2)}</span>` : ''}
+            ${note.category ? `<span class="result-category">${note.category}</span>` : ''}
+            ${(note.tags || []).map(tag => `<span class="result-tag">#${tag}</span>`).join('')}
+          </div>
+          <div class="result-actions">
+            <button class="btn-similar" onclick="findSimilar('${note.id || note._id}')">
+              🔗 Similar
+            </button>
+            <button class="btn-delete" onclick="deleteNote('${note.id || note._id}')">
+              🗑️ Delete
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function highlightText(text, highlights) {
+      if (highlights && highlights.length > 0) {
+        return highlights.join('... ');
+      }
+      return text || '';
+    }
+
+    function truncate(text, length) {
+      if (!text) return '';
+      return text.length > length ? text.substring(0, length) + '...' : text;
+    }
+
+    // Find Similar
+    async function findSimilar(id) {
+      try {
+        showLoader();
+        const response = await fetch(`${API_URL}/search/similar/${id}`);
+        const data = await response.json();
+        displayResults(data.results, 'similar');
+        showToast(`Found ${data.total} similar notes`);
+      } catch (error) {
+        showToast('❌ Failed to find similar notes', 'error');
+      }
+    }
+
+    // Delete Note
+    async function deleteNote(id) {
+      if (!confirm('Delete this note?')) return;
+      
+      try {
+        await fetch(`${API_URL}/notes/${id}`, { method: 'DELETE' });
+        showToast('🗑️ Note deleted');
+        performSearch();
+      } catch (error) {
+        showToast('❌ Failed to delete note', 'error');
+      }
+    }
+
+    // Create Note Modal
+    function openCreateModal() {
+      document.getElementById('createModal').classList.add('show');
+    }
+
+    function closeCreateModal() {
+      document.getElementById('createModal').classList.remove('show');
+    }
+
+    async function createNote(event) {
+      event.preventDefault();
+      
+      const note = {
+        title: document.getElementById('noteTitle').value,
+        content: document.getElementById('noteContent').value,
+        category: document.getElementById('noteCategory').value,
+        tags: document.getElementById('noteTags').value.split(',').map(t => t.trim()).filter(t => t)
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(note)
+        });
+        
+        const data = await response.json();
+        showToast('✅ Note created!');
+        closeCreateModal();
+        
+        // Reset form
+        document.getElementById('noteTitle').value = '';
+        document.getElementById('noteContent').value = '';
+        document.getElementById('noteTags').value = '';
+        
+        getAllNotes();
+      } catch (error) {
+        showToast('❌ Failed to create note', 'error');
+      }
+    }
+
+    // Analytics
+    async function getCategories() {
+      try {
+        const response = await fetch(`${API_URL}/stats/categories`);
+        const data = await response.json();
+        
+        const maxCount = Math.max(...data.categories.map(c => c.doc_count));
+        
+        const statsCard = document.getElementById('statsCard');
+        const statsContent = document.getElementById('statsContent');
+        
+        statsContent.innerHTML = `
+          <h3 style="margin-bottom: 20px;">📁 Notes by Category</h3>
+          ${data.categories.map(cat => `
+            <div class="category-bar">
+              <span class="category-name">${cat.key}</span>
+              <div class="category-progress">
+                <div class="category-fill" style="width: ${(cat.doc_count / maxCount) * 100}%"></div>
+              </div>
+              <span class="category-count">${cat.doc_count}</span>
+            </div>
+          `).join('')}
+        `;
+        
+        statsCard.style.display = 'block';
+        showToast('📊 Category stats loaded');
+      } catch (error) {
+        showToast('❌ Failed to load categories', 'error');
+      }
+    }
+
+    async function getTags() {
+      try {
+        const response = await fetch(`${API_URL}/stats/tags`);
+        const data = await response.json();
+        
+        const statsCard = document.getElementById('statsCard');
+        const statsContent = document.getElementById('statsContent');
+        
+        statsContent.innerHTML = `
+          <h3 style="margin-bottom: 20px;">🏷️ Tag Cloud</h3>
+          <div class="tag-cloud">
+            ${data.tags.map(tag => `
+              <span class="tag-item" onclick="searchQuery('${tag.key}')">
+                #${tag.key}
+                <span class="tag-count">${tag.doc_count}</span>
+              </span>
+            `).join('')}
+          </div>
+        `;
+        
+        statsCard.style.display = 'block';
+        showToast('🏷️ Tag cloud loaded');
+      } catch (error) {
+        showToast('❌ Failed to load tags', 'error');
+      }
+    }
+
+    async function getTimeline() {
+      try {
+        const response = await fetch(`${API_URL}/stats/timeline`);
+        const data = await response.json();
+        
+        const statsCard = document.getElementById('statsCard');
+        const statsContent = document.getElementById('statsContent');
+        
+        const maxCount = Math.max(...data.timeline.map(t => t.doc_count));
+        
+        statsContent.innerHTML = `
+          <h3 style="margin-bottom: 20px;">📈 Notes Timeline</h3>
+          ${data.timeline.filter(t => t.doc_count > 0).map(t => {
+            const date = new Date(t.key_as_string).toLocaleDateString();
+            return `
+              <div class="category-bar">
+                <span class="category-name">${date}</span>
+                <div class="category-progress">
+                  <div class="category-fill" style="width: ${(t.doc_count / maxCount) * 100}%"></div>
+                </div>
+                <span class="category-count">${t.doc_count}</span>
+              </div>
+            `;
+          }).join('')}
+        `;
+        
+        statsCard.style.display = 'block';
+        showToast('📈 Timeline loaded');
+      } catch (error) {
+        showToast('❌ Failed to load timeline', 'error');
+      }
+    }
+
+    // Reindex
+    async function reindex() {
+      try {
+        showToast('🔄 Reindexing...');
+        const response = await fetch(`${API_URL}/reindex`, { method: 'POST' });
+        const data = await response.json();
+        showToast(`✅ Reindexed ${data.indexed} notes`);
+      } catch (error) {
+        showToast('❌ Reindex failed', 'error');
+      }
+    }
+
+    // Loader
+    function showLoader() {
+      document.getElementById('loader').classList.add('show');
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('resultsGrid').innerHTML = '';
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').classList.remove('show');
+    }
+
+    // Close modal on outside click
+    document.getElementById('createModal').addEventListener('click', (e) => {
+      if (e.target.id === 'createModal') closeCreateModal();
+    });
+
+    // Close suggestions on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-container')) {
+        document.getElementById('suggestions').classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>
