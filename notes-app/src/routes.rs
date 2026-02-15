@@ -12,7 +12,5 @@ pub fn note_routes() -> Router<Database> {
         .route(
             "/notes/:id",
             get(get_note).put(update_note).delete(delete_note),
-            // ↑ These .put() and .delete() are METHODS on MethodRouter,
-            // not the functions you imported
         )
 }

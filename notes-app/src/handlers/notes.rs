@@ -6,7 +6,7 @@ use mongodb::{
     Database,
     bson::{doc, oid::ObjectId},
 };
-use futures::stream::TryStreamExt;  // ← ADD THIS
+use futures::stream::TryStreamExt;
 use crate::{models::Note, error::AppError};
 
 type Db = Database;
