@@ -455,6 +455,7 @@ app.get("/search/phrase", async (req, res) => {
 });
 
 // 4️⃣ WILDCARD SEARCH (pattern matching)
+
 app.get("/search/wildcard", async (req, res) => {
   try {
     const { q } = req.query;
