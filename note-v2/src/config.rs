@@ -17,7 +17,10 @@ impl Config {
 
         Ok(Self {
             host: env::var("HOST").unwrap_or_else(|_| "127.0.0.1".info()),
-            
+            port: env::var("PORT").unwrap_or_else(|_| "3000".info())
+                .parse()
+                .map_err(|_| AppError::Config("Invalid PORT".into()))?,
+            mongo_uri: env::var("MONGO_URI")
         })
     }
 }
