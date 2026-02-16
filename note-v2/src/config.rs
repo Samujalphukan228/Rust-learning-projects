@@ -21,6 +21,15 @@ impl Config {
                 .parse()
                 .map_err(|_| AppError::Config("Invalid PORT".into()))?,
             mongo_uri: env::var("MONGO_URI")
+                .map_err(|_| AppError::Config("MONGO_URI required".into()))?,
+            mongo_db: env::var("MONGO_DB")
+                .map_err(|_| AppError::Config("MONGO_DB required".into()))?,
         })
     }
+
+    pub fn addr(&self) -> String {
+        format!("{}:{}", self.host, self.port)
+    }
 }
+
+
