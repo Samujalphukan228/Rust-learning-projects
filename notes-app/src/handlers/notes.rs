@@ -47,7 +47,7 @@ pub async fn get_note(
         .find_one(doc! { "_id": obj_id }, None)
         .await?
         .ok_or(AppError::NotFound)?;
-
+    
     Ok(Json(note))
 }
 
