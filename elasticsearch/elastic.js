@@ -4,6 +4,7 @@ export const elastic = new Client({
   node: "http://localhost:9200"
 });
 
+
 export const createIndex = async () => {
   const exists = await elastic.indices.exists({ index: "notes" });
 
